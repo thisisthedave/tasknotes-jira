@@ -24,24 +24,19 @@ Install, enable, and configure both dependencies before using TaskNotes Jira. In
 - Use TaskNotes’ existing creation defaults, templates, and safe filename generation.
 - Optionally use the active note as the project when the Jira mapping does not explicitly supply one.
 
-## Installation
-
-To install from source:
-
-1. Install and configure TaskNotes and Jira Issue.
-2. Download or build `main.js`, `manifest.json`, and `styles.css` for TaskNotes Jira.
-3. Place the files in `<vault>/.obsidian/plugins/tasknotes-jira/`.
-4. Reload Obsidian.
-5. Enable **TaskNotes Jira** under **Settings → Community plugins**.
-
 ## Usage
 
 After the dependencies are configured:
 
 1. Open **Settings → TaskNotes Jira** and configure the Jira-to-TaskNotes field mappings.
+![Configure field mapping](docs/images/jira-import-settings-field-mapping.png)
+![Configure TaskNotes value mapping](docs/images/jira-import-settings-value-mapping.png)
 2. Optionally fetch a sample issue to verify the resolved values.
+![Preview issue in settings](docs/images/jira-import-settings.png)
 3. Run **Import Jira issue as task** from the command palette.
+![Jira import command](docs/images/jira-import-command-palette.png)
 4. Enter an issue key such as `PROJ-1234`.
+![Jira import prompt](docs/images/jira-import-dialog.png)
 
 The companion plugin retrieves the issue through Jira Issue and submits the mapped task through TaskNotes’ public API. TaskNotes remains responsible for applying task defaults, generating a safe filename, writing the note, and updating its cache.
 
@@ -62,6 +57,13 @@ This plugin requires the TaskNotes runtime API v1 with the `tasks.write` capabil
 - **A mapping produces no value:** Load the issue in the mapping preview and compare the configured path with the raw JSON.
 
 ## Development
+To install from source:
+
+1. Install and configure TaskNotes and Jira Issue.
+2. Download or build `main.js`, `manifest.json`, and `styles.css` for TaskNotes Jira.
+3. Place the files in `<vault>/.obsidian/plugins/tasknotes-jira/`.
+4. Reload Obsidian.
+5. Enable **TaskNotes Jira** under **Settings → Community plugins**.
 
 ```bash
 npm install
