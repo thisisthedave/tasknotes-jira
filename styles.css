@@ -1,8 +1,10 @@
-/*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
+.tasknotes-jira-preview__values { border: 1px solid var(--background-modifier-border); border-radius: var(--radius-s); }
+.tasknotes-jira-preview__row { display: grid; grid-template-columns: minmax(8rem, 1fr) minmax(0, 2fr); gap: 1rem; padding: .5rem .75rem; border-bottom: 1px solid var(--background-modifier-border); }
+.tasknotes-jira-preview__row:last-child { border-bottom: 0; }
+.tasknotes-jira-preview__label { font-weight: var(--font-semibold); }
+.tasknotes-jira-preview__value { overflow-wrap: anywhere; white-space: pre-wrap; }
+.tasknotes-jira-preview__value.is-missing, .tasknotes-jira-preview__value.is-invalid { color: var(--text-muted); font-style: italic; }
+.tasknotes-jira-preview__error { color: var(--text-error); padding: .75rem 0; }
+.tasknotes-jira-preview__raw { margin-top: 1rem; }
+.tasknotes-jira-preview__toolbar { display: flex; justify-content: flex-end; margin-top: .5rem; }
+.tasknotes-jira-preview__raw pre { height: 16rem; min-height: 8rem; max-height: 36rem; resize: vertical; overflow: auto; padding: .75rem; background: var(--background-secondary); border-radius: var(--radius-s); white-space: pre-wrap; }

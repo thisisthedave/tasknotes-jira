@@ -1,0 +1,10 @@
+import { describe, expect, it, vi } from 'vitest';
+import { JiraIssueAdapter, normalizeJiraIssueKey } from '../src/dependencies/JiraIssueAdapter';
+import { TaskNotesAdapter } from '../src/dependencies/TaskNotesAdapter';
+import { JiraImportService } from '../src/jira/JiraImportService';
+import { createDefaultJiraMappingSettings } from '../src/jira/JiraFieldMapping';
+describe('dependency adapters and import', () => {
+	it('normalizes keys and rejects invalid keys before plugin lookup', async () => { expect(normalizeJiraIssueKey(' proj-12 ')).toBe('PROJ-12'); const lookup = vi.fn(); await expect(new JiraIssueAdapter(lookup).getIssue('bad')).rejects.toMatchObject({ code: 'invalid-issue-key' }); expect(lookup).not.toHaveBeenCalled(); });
+	it('validates dependency APIs and malformed Jira responses', async () => { await expect(new JiraIssueAdapter(() => null).getIssue('PROJ-1')).rejects.toMatchObject({ code: 'dependency-unavailable' }); const bad = new JiraIssueAdapter(() => ({ api: { base: { getIssue: vi.fn().mockResolvedValue({ key: 'PROJ-1', fields: {} }) } } })); await expect(bad.getIssue('PROJ-1')).rejects.toMatchObject({ code: 'invalid-response' }); expect(new TaskNotesAdapter(() => ({ api: { apiVersion: 2, capabilities: ['tasks.write'], createTask: vi.fn() } })).isAvailable()).toBe(false); });
+	it('fetches and creates exactly once', async () => { const getIssue = vi.fn().mockResolvedValue({ key: 'PROJ-1', fields: { summary: 'Ship it' } }); const createTask = vi.fn().mockResolvedValue({ title: 'PROJ-1 Ship it', path: 'tasks/one.md' }); const service = new JiraImportService(new JiraIssueAdapter(() => ({ api: { base: { getIssue } } })), new TaskNotesAdapter(() => ({ api: { apiVersion: 1, capabilities: ['tasks.write'], createTask } })), createDefaultJiraMappingSettings(), []); await expect(service.importIssue('proj-1')).resolves.toMatchObject({ path: 'tasks/one.md' }); expect(getIssue).toHaveBeenCalledOnce(); expect(createTask).toHaveBeenCalledOnce(); const data = createTask.mock.calls[0]?.[0] as { details?: string }; expect(data.details).toBe('JIRA:PROJ-1'); });
+});

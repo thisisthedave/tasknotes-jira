@@ -11,7 +11,7 @@ TaskNotes Jira depends on two other Obsidian plugins:
 
 Install, enable, and configure both dependencies before using TaskNotes Jira. In particular, verify that Jira Issue can load an issue from your Jira account and that TaskNotes can create a normal task.
 
-## Planned features
+## Features
 
 - Import a Jira issue by key from the Obsidian command palette.
 - Map Jira JSON paths, templates, fixed values, and disabled sources to TaskNotes properties.
@@ -22,7 +22,7 @@ Install, enable, and configure both dependencies before using TaskNotes Jira. In
 - Inspect, resize, and copy a sample issue’s raw JSON without persisting it.
 - Add a `JIRA:PROJ-1234` backlink to the imported task while preserving the mapped description.
 - Use TaskNotes’ existing creation defaults, templates, and safe filename generation.
-- Use the active note as the project when the relevant TaskNotes default is enabled, unless the Jira mapping explicitly supplies a project.
+- Optionally use the active note as the project when the Jira mapping does not explicitly supply one.
 
 ## Installation
 
@@ -53,7 +53,7 @@ Jira issues can contain sensitive project information. Review raw JSON before co
 
 ## Compatibility
 
-This plugin relies on runtime APIs exposed by TaskNotes and Jira Issue. Compatible minimum versions will be documented before the first release. If either dependency is missing or exposes an incompatible API, imports should be disabled with an explanatory notice rather than failing silently.
+This plugin requires the TaskNotes runtime API v1 with the `tasks.write` capability and the Jira Issue `api.base.getIssue` API. It detects missing or incompatible dependencies at runtime and reports actionable notices.
 
 ## Troubleshooting
 

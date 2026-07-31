@@ -1,0 +1,4 @@
+import type { JiraEnumRemap, JiraIssue } from '../jira/types';
+export const MAX_JIRA_RAW_PREVIEW_CHARS = 50_000;
+export function serializeJiraIssuePreview(issue: JiraIssue, maxChars = MAX_JIRA_RAW_PREVIEW_CHARS): { text: string; truncated: boolean } { const json = JSON.stringify(issue, null, 2); return json.length <= maxChars ? { text: json, truncated: false } : { text: `${json.slice(0, maxChars)}\n…`, truncated: true }; }
+export function parseJiraEnumRemaps(value: string): JiraEnumRemap[] { return value.split(/\r?\n/).map((line) => { const at = line.indexOf('='); if (at < 0) return null; const taskValue = line.slice(0, at).trim(); const jiraValues = line.slice(at + 1).split(',').map((item) => item.trim()).filter(Boolean); return taskValue && jiraValues.length ? { taskValue, jiraValues } : null; }).filter((entry): entry is JiraEnumRemap => !!entry); }
