@@ -1,92 +1,75 @@
-# Obsidian Sample Plugin
+# TaskNotes Jira
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+TaskNotes Jira is an Obsidian companion plugin that imports Jira issues as TaskNotes tasks. It connects the Jira data supplied by the Jira Issue plugin to TaskNotes’ task-creation API, with configurable field mapping, import previews, and Jira backlinks.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Requirements
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
+TaskNotes Jira depends on two other Obsidian plugins:
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and outputs a Notice on click.
-- Registers a global interval which logs 'setInterval' to the console.
+- **TaskNotes** [`tasknotes`](https://community.obsidian.md/plugins/tasknotes) creates and manages the imported task notes.
+- **Jira Issue** [`obsidian-jira-issue`](https://community.obsidian.md/plugins/obsidian-jira-issue) connects to Jira and retrieves issue data.
 
-## First time developing plugins?
+Install, enable, and configure both dependencies before using TaskNotes Jira. In particular, verify that Jira Issue can load an issue from your Jira account and that TaskNotes can create a normal task.
 
-Quick starting guide for new plugin devs:
+## Planned features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `src/main.ts` to `main.js`.
-- Make changes to `src/main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- Import a Jira issue by key from the Obsidian command palette.
+- Map Jira JSON paths, templates, fixed values, and disabled sources to TaskNotes properties.
+- Merge multiple Jira sources into list-valued TaskNotes properties.
+- Remap Jira status, priority, and context values.
+- Map Jira data into TaskNotes user-defined fields.
+- Fetch a sample issue and preview the values produced by the current mapping.
+- Inspect, resize, and copy a sample issue’s raw JSON without persisting it.
+- Add a `JIRA:PROJ-1234` backlink to the imported task while preserving the mapped description.
+- Use TaskNotes’ existing creation defaults, templates, and safe filename generation.
+- Use the active note as the project when the relevant TaskNotes default is enabled, unless the Jira mapping explicitly supplies a project.
 
-## Releasing new releases
+## Installation
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+To install from source:
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+1. Install and configure TaskNotes and Jira Issue.
+2. Download or build `main.js`, `manifest.json`, and `styles.css` for TaskNotes Jira.
+3. Place the files in `<vault>/.obsidian/plugins/tasknotes-jira/`.
+4. Reload Obsidian.
+5. Enable **TaskNotes Jira** under **Settings → Community plugins**.
 
-## Adding your plugin to the community plugin list
+## Usage
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+After the dependencies are configured:
 
-## How to use
+1. Open **Settings → TaskNotes Jira** and configure the Jira-to-TaskNotes field mappings.
+2. Optionally fetch a sample issue to verify the resolved values.
+3. Run **Import Jira issue as task** from the command palette.
+4. Enter an issue key such as `PROJ-1234`.
 
-- Clone this repo.
-- Make sure your NodeJS is at least v18 (`node --version`).
-- `npm i` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+The companion plugin retrieves the issue through Jira Issue and submits the mapped task through TaskNotes’ public API. TaskNotes remains responsible for applying task defaults, generating a safe filename, writing the note, and updating its cache.
 
-## Manually installing the plugin
+## Privacy and security
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+TaskNotes Jira does not implement Jira authentication and should not store Jira credentials. Jira requests and account configuration are delegated to Jira Issue. Sample issue data is held only in memory for the settings preview and is not saved in this plugin’s settings.
 
-## Improve code quality with eslint
+Jira issues can contain sensitive project information. Review raw JSON before copying or sharing it, and protect your Obsidian vault and plugin data accordingly. This plugin does not include telemetry.
 
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+## Compatibility
 
-## Funding URL
+This plugin relies on runtime APIs exposed by TaskNotes and Jira Issue. Compatible minimum versions will be documented before the first release. If either dependency is missing or exposes an incompatible API, imports should be disabled with an explanatory notice rather than failing silently.
 
-You can include funding URLs where people who use your plugin can financially support it.
+## Troubleshooting
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+- **The import command reports that Jira Issue is unavailable:** Enable Jira Issue and confirm that its Jira account is configured.
+- **The import command reports that TaskNotes is unavailable:** Enable TaskNotes and confirm that it can create a task normally.
+- **A mapping produces no value:** Load the issue in the mapping preview and compare the configured path with the raw JSON.
 
-```json
-{
-	"fundingUrl": "https://buymeacoffee.com"
-}
+## Development
+
+```bash
+npm install
+npm run dev
 ```
 
-If you have multiple URLs, you can also do:
+Run `npm run build` for a production bundle and `npm run lint` before submitting changes. The required Obsidian release artifacts are `main.js`, `manifest.json`, and `styles.css`.
 
-```json
-{
-	"fundingUrl": {
-		"Buy Me a Coffee": "https://buymeacoffee.com",
-		"GitHub Sponsor": "https://github.com/sponsors",
-		"Patreon": "https://www.patreon.com/"
-	}
-}
-```
+## License
 
-## API Documentation
-
-See https://docs.obsidian.md
+See [LICENSE](LICENSE).

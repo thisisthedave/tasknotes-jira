@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "tasknotes-jira",
+	"name": "TaskNotes for Jira",
 	"version": "1.0.0",
 	"minAppVersion": "1.0.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Integrates TaskNotes with Jira.",
+	"author": "Dave Smith",
+	"authorUrl": "https://github.com/thisisthedave",
+	"fundingUrl": "https://buymeacoffee.com/thisisthedave",
 	"isDesktopOnly": false
 }

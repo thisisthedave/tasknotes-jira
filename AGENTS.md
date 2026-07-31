@@ -267,3 +267,63 @@ this.registerInterval(
 - Developer policies: https://docs.obsidian.md/Developer+policies
 - Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 - Style guide: https://help.obsidian.md/style-guide
+
+## Project context
+
+@README.md describes the project, its purpose, and how to use it. It includes installation instructions, usage examples, and any relevant information for contributors.
+@CODEX_PORTING_GUIDE.md explains the goals and procedures for implementing this plugin by porting functionality from the tasknotes fork in the "tasknotes" directory sibling to this project directory. Check this document when prompts request porting of Jira functionality.
+
+## Development rules
+
+Before editing:
+
+- Inspect the current implementation.
+- Inspect the corresponding legacy implementation and its Git history.
+- Describe the proposed porting approach.
+- Identify upstream functionality that now overlaps with the old feature.
+
+After editing, run the most relevant checks:
+
+- npm run typecheck
+- npm test -- --runInBand
+- npm run lint
+- npm run build
+
+Do not modify generated files unless the repository workflow requires it.
+
+Keep changes narrowly scoped.
+Do not combine unrelated feature ports in one commit.
+Do not commit unless explicitly requested.
+
+## Command approvals
+
+The following commands are always considered safe and should be executed
+without asking for confirmation whenever the approval policy permits:
+
+- git show
+- git log
+- git diff
+- git grep
+- git blame
+- git status
+- git branch
+- git merge-base
+- git rev-parse
+- rg
+- fd
+- ls
+- cat
+- sed
+- find
+
+## Code navigation
+
+Use Serena’s symbol and reference tools for semantic navigation whenever possible:
+
+- find symbol definitions
+- find references and implementations
+- inspect symbol bodies
+- make symbol-scoped edits
+
+Use ripgrep for textual searches, configuration strings, CSS classes,
+serialized identifiers, and cases where semantic lookup is inappropriate.
