@@ -136,7 +136,10 @@ Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particula
 - Bundle everything into `main.js` (no unbundled runtime deps).
 - Avoid Node/Electron APIs if you want mobile compatibility; set `isDesktopOnly` accordingly.
 - Prefer `async/await` over promise chains; handle errors gracefully.
-
+- For any new class, module, or function, always write a doc comment for the entity explaining
+  its main responsibilities, and pre/post conditions if appropriate.
+- Whenever adding new functionality, add a comment at the point in code that is the fulcrum of the
+  new feature explaining what it is doing and why.
 ## Mobile
 
 - Where feasible, test on iOS and Android.
@@ -315,6 +318,9 @@ without asking for confirmation whenever the approval policy permits:
 - cat
 - sed
 - find
+- npm test
+- npm run lint
+- npm run build
 
 ## Code navigation
 
