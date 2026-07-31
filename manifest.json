@@ -2,7 +2,7 @@
 	"id": "tasknotes-jira",
 	"name": "TaskNotes for Jira",
 	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
+	"minAppVersion": "1.2.3",
 	"description": "Integrates TaskNotes with Jira.",
 	"author": "Dave Smith",
 	"authorUrl": "https://github.com/thisisthedave",

@@ -1,12 +1,14 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "tasknotes-jira",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Import Jira issues as TaskNotes tasks in Obsidian",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"typecheck": "tsc -noEmit -skipLibCheck",
+		"test": "vitest run",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint ."
 	},
@@ -21,6 +23,7 @@
 		"globals": "^17.6.0",
 		"jiti": "^2.6.1",
 		"obsidian": "latest",
+		"vitest": "^3.2.4",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.59.1"
 	}
