@@ -70,6 +70,8 @@ npm run dev
 
 Run `npm run build` for a production bundle and `npm run lint` before submitting changes. The required Obsidian release artifacts are `main.js`, `manifest.json`, and `styles.css`.
 
+Because this repository already lives inside an Obsidian vault, `npm run build` makes the current sandbox installation ready to reload. To deploy the same artifacts to a separate test vault, run `npm run build:test`. Its destination defaults to the sibling TaskNotes E2E vault and can be overridden with `OBSIDIAN_PLUGIN_PATH` or a git-ignored `.copy-files.local` file containing one destination plugin directory per line.
+
 ## License
 
 See [LICENSE](LICENSE).
