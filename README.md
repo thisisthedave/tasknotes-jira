@@ -1,4 +1,4 @@
-# TaskNotes Jira
+# TaskNotes for Jira
 
 TaskNotes Jira is an Obsidian companion plugin that imports Jira issues as TaskNotes tasks. It connects the Jira data supplied by the Jira Issue plugin to TaskNotes’ task-creation API, with configurable field mapping, import previews, and Jira backlinks.
 

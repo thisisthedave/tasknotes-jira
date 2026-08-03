@@ -1,4 +1,5 @@
 import { App, Notice, PluginSettingTab, Setting, setIcon } from 'obsidian';
+import type { SettingDefinition, SettingDefinitionItem, SettingGroupItem } from 'obsidian';
 import type TaskNotesJiraPlugin from '../main';
 import { JiraIssueAdapter } from '../dependencies/JiraIssueAdapter';
 import { TaskNotesAdapter } from '../dependencies/TaskNotesAdapter';
@@ -9,7 +10,119 @@ const MODE_LABELS: Record<JiraValueSourceMode, string> = { path: 'Jira path', te
 const humanize = (value: string): string => value.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (letter) => letter.toUpperCase());
 
 export class JiraMappingSettingTab extends PluginSettingTab {
+	private sampleKey = '';
+	private sample: JiraIssue | null = null;
+	private sampleState: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+	private sampleError = '';
+
 	constructor(app: App, public plugin: TaskNotesJiraPlugin) { super(app, plugin); }
+
+	/**
+	 * Describes the settings for Obsidian 1.13+ search and rendering.
+	 * The callbacks retain the custom mapping and preview controls used by the legacy tab.
+	 */
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		// Render callbacks are the fulcrum of the migration: every custom row becomes searchable without losing its dynamic behavior.
+		const definitions: SettingDefinitionItem[] = [
+			{
+				name: 'Use active note as project',
+				desc: 'When Jira does not map a project, add the active note as a wiki-link project.',
+				render: (setting) => { setting.addToggle((toggle) => toggle.setValue(this.plugin.settings.useActiveNoteAsProject).onChange(async (value) => {
+					this.plugin.settings.useActiveNoteAsProject = value;
+					await this.plugin.saveSettings();
+				})); },
+			},
+			{
+				name: 'Sample issue',
+				desc: 'Fetch explicitly to preview the current mapping. Sample keys and payloads remain in memory only.',
+				render: (setting) => { setting.addText((input) => {
+					input.setPlaceholder('PROJ-1234').setValue(this.sampleKey).onChange((value) => { this.sampleKey = value; });
+					input.inputEl.addEventListener('keydown', (event) => { if (event.key === 'Enter' && this.sampleState !== 'loading') void this.fetchDeclarativeSample(); });
+				}).addButton((button) => button.setButtonText(this.sampleState === 'loading' ? 'Loading…' : 'Fetch').setDisabled(this.sampleState === 'loading').onClick(() => void this.fetchDeclarativeSample())); },
+			},
+		];
+
+		if (this.sampleState === 'error') definitions.push({ name: 'Sample issue error', desc: this.sampleError, searchable: false });
+		if (this.sample) definitions.push({ name: 'Resolved values', aliases: ['Jira preview', 'Raw Jira JSON'], render: (setting) => this.renderPreview(setting.settingEl, this.sample!) });
+
+		definitions.push({
+			type: 'group',
+			heading: 'Field sources',
+			items: [
+				{
+					name: 'Reset mappings',
+					desc: 'Restore the default Jira-to-TaskNotes field sources.',
+					render: (setting) => { setting.addButton((button) => button.setButtonText('Reset mappings').onClick(async () => {
+						this.plugin.settings.jiraMapping = createDefaultJiraMappingSettings();
+						await this.plugin.saveSettings();
+						this.updateDeclarativeSettings();
+					})); },
+				},
+				...JIRA_MAPPING_TARGETS.flatMap((target) => this.getSourceDefinitions(target.id, this.plugin.settings.jiraMapping.fields[target.id] ??= [], target.kind === 'list')),
+			] satisfies SettingGroupItem[],
+		});
+
+		const userFields = TaskNotesAdapter.fromApp(this.app).getUserFields();
+		if (userFields.length) definitions.push({
+			type: 'group',
+			heading: 'User-defined fields',
+			items: userFields.flatMap((field) => this.getSourceDefinitions(field.displayName, this.plugin.settings.jiraMapping.userFields[field.id] ??= [], field.type === 'list')),
+		});
+
+		definitions.push({
+			type: 'group',
+			heading: 'Value remapping',
+			items: (['status', 'priority', 'contexts'] as const).map((key) => ({
+				name: humanize(key),
+				desc: 'One per line: TaskNotes value = Jira value, alternate Jira value.',
+				render: (setting: Setting) => { setting.addTextArea((area) => {
+					area.inputEl.rows = 4;
+					area.setValue(this.plugin.settings.jiraMapping.enumRemaps[key].map((entry) => `${entry.taskValue} = ${entry.jiraValues.join(', ')}`).join('\n')).onChange(async (value) => {
+						this.plugin.settings.jiraMapping.enumRemaps[key] = parseJiraEnumRemaps(value);
+						await this.plugin.saveSettings();
+					});
+				}); },
+			})),
+		});
+
+		return definitions;
+	}
+
+	/** Builds searchable definitions for one scalar or list mapping target. */
+	private getSourceDefinitions(label: string, sources: JiraValueSource[], list: boolean): SettingDefinition[] {
+		if (!list && !sources.length) sources.push({ mode: 'off', value: '' });
+		const definitions: SettingDefinition[] = sources.map((source, index) => ({
+			name: index ? `${humanize(label)} source ${index + 1}` : humanize(label),
+			aliases: ['Jira path', 'Template', 'Fixed value', 'Disabled'],
+			render: (setting) => {
+				setting.addDropdown((dropdown) => {
+					Object.entries(MODE_LABELS).forEach(([mode, optionLabel]) => { dropdown.addOption(mode, optionLabel); });
+					dropdown.setValue(source.mode).onChange(async (mode) => { source.mode = mode as JiraValueSourceMode; await this.plugin.saveSettings(); this.updateDeclarativeSettings(); });
+				}).addText((input) => input.setValue(source.value).setDisabled(source.mode === 'off').setPlaceholder(source.mode === 'template' ? '$key $fields.summary' : 'fields.summary').onChange(async (value) => { source.value = value; await this.plugin.saveSettings(); }));
+				if (list) setting.addExtraButton((button) => button.setIcon('trash-2').setTooltip('Remove source').onClick(async () => { sources.splice(index, 1); await this.plugin.saveSettings(); this.updateDeclarativeSettings(); }));
+			},
+		}));
+		if (list || !sources.length) definitions.push({
+			name: `Add ${humanize(label)} source`,
+			searchable: false,
+			render: (setting) => { setting.addButton((button) => button.setButtonText('Add source').onClick(async () => { sources.push({ mode: 'path', value: '' }); await this.plugin.saveSettings(); this.updateDeclarativeSettings(); })); },
+		});
+		return definitions;
+	}
+
+	/** Refreshes declarative settings only on hosts that provide the Obsidian 1.13 API. */
+	private updateDeclarativeSettings(): void {
+		const update = (this as unknown as { update?: () => void }).update;
+		update?.call(this);
+	}
+
+	/** Fetches the ephemeral sample used by the declarative settings preview. */
+	private async fetchDeclarativeSample(): Promise<void> {
+		this.sampleState = 'loading'; this.sampleError = ''; this.updateDeclarativeSettings();
+		try { this.sample = await JiraIssueAdapter.fromApp(this.app).getIssue(this.sampleKey); this.sampleState = 'success'; }
+		catch (caught) { this.sample = null; this.sampleState = 'error'; this.sampleError = caught instanceof Error ? caught.message : 'Could not fetch the sample issue.'; }
+		this.updateDeclarativeSettings();
+	}
 	display(): void {
 		const container = this.containerEl; container.empty(); container.addClass('tasknotes-jira-settings'); let sampleKey = ''; let sample: JiraIssue | null = null; let state: 'idle' | 'loading' | 'success' | 'error' = 'idle'; let error = '';
 		const render = (): void => {
