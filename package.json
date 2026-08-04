@@ -1,6 +1,6 @@
 {
 	"name": "tasknotes-jira",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Import Jira issues as TaskNotes tasks in Obsidian",
 	"main": "main.js",
 	"type": "module",
