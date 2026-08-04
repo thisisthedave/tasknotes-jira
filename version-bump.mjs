@@ -1,6 +1,14 @@
 import { readFileSync, writeFileSync } from 'fs';
 
+/**
+ * Synchronizes Obsidian release metadata with the version selected by npm.
+ * Precondition: this module runs as npm's version lifecycle hook.
+ */
 const targetVersion = process.env.npm_package_version;
+
+if (!targetVersion) {
+	throw new Error('Run this through `npm version <major|minor|patch|version>`.');
+}
 
 // read minAppVersion from manifest.json and bump version to target version
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));

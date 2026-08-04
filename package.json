@@ -11,7 +11,7 @@
 		"copy-files": "node copy-files.mjs",
 		"typecheck": "tsc -noEmit -skipLibCheck",
 		"test": "vitest run",
-		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"version": "node version-bump.mjs && node scripts/prepare-release-notes.mjs && node scripts/update-release-index.mjs && git add manifest.json versions.json docs/releases.md docs/releases",
 		"lint": "eslint ."
 	},
 	"keywords": [],

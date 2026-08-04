@@ -9,6 +9,8 @@ export default defineConfig(
 		'esbuild.config.mjs',
 		'copy-files.mjs',
 		'version-bump.mjs',
+		'scripts/prepare-release-notes.mjs',
+		'scripts/update-release-index.mjs',
 		'versions.json',
 		'main.js',
 		'package.json',

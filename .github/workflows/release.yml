@@ -14,6 +14,8 @@ jobs:
             attestations: write
         steps:
             - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
 
             - name: Use Node.js
               uses: actions/setup-node@v6
@@ -26,6 +28,19 @@ jobs:
                   npm ci
                   npm run build
 
+            - name: Verify release metadata
+              run: |
+                  tag="${GITHUB_REF#refs/tags/}"
+                  manifest_version="$(node -p "require('./manifest.json').version")"
+                  if [ "$tag" != "$manifest_version" ]; then
+                    echo "Tag $tag does not match manifest version $manifest_version"
+                    exit 1
+                  fi
+                  if [ ! -f "docs/releases/$tag.md" ]; then
+                    echo "Release notes file not found: docs/releases/$tag.md"
+                    exit 1
+                  fi
+
             - name: Check for optional styles
               id: styles
               run: |
@@ -36,6 +51,7 @@ jobs:
               with:
                   subject-path: |
                       main.js
+                      manifest.json
                       ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}
 
             - name: Create release
@@ -47,4 +63,5 @@ jobs:
                   gh release create "$tag" \
                     --title="$tag" \
                     --draft \
+                    --notes-file="docs/releases/$tag.md" \
                     main.js manifest.json ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}

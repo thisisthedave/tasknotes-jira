@@ -74,6 +74,19 @@ Run `npm run build` for a production bundle and `npm run lint` before submitting
 
 Because this repository already lives inside an Obsidian vault, `npm run build` makes the current sandbox installation ready to reload. To deploy the same artifacts to a separate test vault, run `npm run build:test`. Its destination defaults to the sibling TaskNotes E2E vault and can be overridden with `OBSIDIAN_PLUGIN_PATH` or a git-ignored `.copy-files.local` file containing one destination plugin directory per line.
 
+### Releases
+
+Add user-facing changes to `docs/releases/unreleased.md`, then prepare a release with npm's version command:
+
+```bash
+npm version patch
+git push --follow-tags
+```
+
+Use `minor`, `major`, or an explicit semantic version instead of `patch` when appropriate. The version lifecycle synchronizes `manifest.json` and `versions.json`, promotes the unreleased notes to `docs/releases/<version>.md`, regenerates the release index, commits the changes, and creates the version tag. Pushing the tag triggers GitHub Actions, which builds the plugin and creates a draft GitHub release using that Markdown file. Review and publish the draft in GitHub.
+
+`npm run version` only invokes the lifecycle script directly and does not create npm's version commit or Git tag; use `npm version ...` for releases.
+
 ## License
 
 See [LICENSE](LICENSE).
