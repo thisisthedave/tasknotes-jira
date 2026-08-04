@@ -11,8 +11,11 @@ function addActiveProject(plugin: TaskNotesJiraPlugin, data: TaskCreationData): 
 	const target = normalizePath(file.path.replace(/\.md$/i, '')); return { ...data, projects: [`[[${target}|${file.basename}]]`] };
 }
 export async function executeJiraImport(plugin: TaskNotesJiraPlugin): Promise<void> {
-	const key = await showTextInputModal(plugin.app); if (!key) return;
+	const key = await showTextInputModal(plugin.app, plugin.i18n); if (!key) return;
 	const service = new JiraImportService(JiraIssueAdapter.fromApp(plugin.app), TaskNotesAdapter.fromApp(plugin.app), plugin.settings.jiraMapping, TaskNotesAdapter.fromApp(plugin.app).getUserFields(), (data) => addActiveProject(plugin, data));
-	try { const task = await service.importIssue(key); new Notice(`Imported ${typeof task.title === 'string' ? task.title : key.trim().toUpperCase()} from Jira.`); }
-	catch (error) { const messages: Record<string, string> = { 'invalid-issue-key': 'Enter a Jira key such as PROJ-1234.', 'jira-unavailable': 'Enable and configure Jira Issue before importing.', 'tasknotes-unavailable': 'Enable a compatible TaskNotes version before importing.', 'fetch-failed': 'Jira Issue could not retrieve that issue.', 'creation-failed': 'TaskNotes could not create the imported task.' }; new Notice(error instanceof JiraImportError ? messages[error.code] ?? error.message : 'The Jira issue could not be imported.'); }
+	try { const task = await service.importIssue(key); new Notice(plugin.i18n.translate('import.success', { title: typeof task.title === 'string' ? task.title : key.trim().toUpperCase() })); }
+	catch (error) {
+		const errorKeys: Record<string, string> = { 'invalid-issue-key': 'import.errors.invalidIssueKey', 'jira-unavailable': 'import.errors.jiraUnavailable', 'tasknotes-unavailable': 'import.errors.tasknotesUnavailable', 'fetch-failed': 'import.errors.fetchFailed', 'creation-failed': 'import.errors.creationFailed' };
+		new Notice(plugin.i18n.translate(error instanceof JiraImportError ? errorKeys[error.code] ?? 'import.errors.unknown' : 'import.errors.unknown'));
+	}
 }

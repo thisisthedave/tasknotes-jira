@@ -333,3 +333,6 @@ Use Serena’s symbol and reference tools for semantic navigation whenever possi
 
 Use ripgrep for textual searches, configuration strings, CSS classes,
 serialized identifiers, and cases where semantic lookup is inappropriate.
+
+## Localization
+Localize all user-facing strings. Refer to the internationalization guide in the tasknotes project in the sibiling "tasknotes" directory @../tasknotes/I18N_GUIDE.md.
